@@ -11,7 +11,7 @@
 const bodyParser = require('body-parser')
 const dotenv = require('dotenv')
 const express = require('express')
-const { InfluxDB, Point } = require('@influxdata/influxdb-client')
+const { InfluxDB, Point, WritePrecision } = require('@influxdata/influxdb-client')
 
 dotenv.config()
 
@@ -37,12 +37,12 @@ const SKIP_VALUES = ['id', 'name', 'updateAt']
  * Parse data from Ruuvi Station mobile application JSON payload
  * Push data to InfluxDB via configured environment
  */
-app.post('/api/station', async function (req, res) {
+app.post('/api/station', function (req, res) {
   console.debug('Received Ruuvi Station gateway API payload request')
   console.debug(req.body)
 
   const client = new InfluxDB({ url: influx.url, token: influx.token })
-  const writeApi = client.getWriteApi(influx.org, influx.bucket)
+  const writeApi = client.getWriteApi(influx.org, influx.bucket, 'ms')
 
   const measurement = req.body
   for (const tag of measurement.tags) {
@@ -94,7 +94,7 @@ app.post('/api/station', async function (req, res) {
   res.json({ 'eventId': measurement.eventId })
 })
 
-app.get('/api/health', async function (req, res) {
+app.get('/api/health', function (_, res) {
   console.debug('Received Ruuvi Station gateway API health check request')
   res.json({ 'status': 'OK' })
 })
