@@ -54,7 +54,7 @@ app.post('/api/station', function (req, res) {
 
       let point = new Point('ruuvi_measurement')
         .tag('id', id)
-        .tag('deviceID', measurement.deviceID)
+        .tag('deviceId', measurement.deviceId)
         .floatField('stationBatteryLevel', measurement.batteryLevel)
         .floatField('stationTime', new Date(measurement.time).getTime())
         .timestamp(new Date(tag.updateAt).getTime())
