@@ -56,7 +56,7 @@ app.post('/api/station', function (req, res) {
         .tag('id', id)
         .tag('deviceID', measurement.deviceID)
         .floatField('stationBatteryLevel', measurement.batteryLevel)
-        .floatField('stationTime', measurement.time)
+        .floatField('stationTime', new Date(measurement.time).getTime())
         .timestamp(new Date(tag.updateAt).getTime())
 
       if (tag.name) {
