@@ -31,6 +31,8 @@ const app = express()
 
 app.use(bodyParser.json())
 
+const SKIP_VALUES = ['id', 'name', 'updateAt']
+
 /**
  * Parse data from Ruuvi Station mobile application JSON payload
  * Push data to InfluxDB via configured environment
@@ -47,18 +49,29 @@ app.post('/api/station', async function (req, res) {
     const id = tag.id
 
     for (const key in tag) {
+      if (SKIP_VALUES.includes(key)) continue;
       const value = tag[key]
 
-      let point = new Point(key).tag('id', id)
+      let point = new Point('ruuvi_measurement')
+        .tag('id', id)
+        .tag('deviceID', measurement.deviceID)
+        .floatField('stationBatteryLevel', measurement.batteryLevel)
+        .floatField('stationTime', measurement.time)
+        .timestamp(new Date(tag.updateAt).getTime())
+
+      if (tag.name) {
+        point = point.tag('name', tag.name)
+      }
+
       switch (typeof (value)) {
         case 'number':
-          point = point.floatField('value', value)
+          point = point.floatField(key, value)
           break
         case 'string':
-          point = point.stringField('value', value)
+          point = point.stringField(key, value)
           break
         case 'boolean':
-          point = point.booleanField('value', value)
+          point = point.booleanField(key, value)
           break
         default:
           continue
